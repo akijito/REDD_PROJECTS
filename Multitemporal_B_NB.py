@@ -30,6 +30,7 @@ def multitemporal(direccion_carpeta, carpeta_salida, year1, year2, year3, year4,
     traslape['CATEGORIA1'] = traslape.apply(primer_periodo, axis = 1)
     traslape['AREA1_HA'] = traslape['geometry'].area/10000.0
     filtrado1 = traslape[traslape['geometry'].geom_type == 'Polygon']
+    filtrado1 = filtrado1[filtrado1['AREA1_HA']>0.0001]
     multitemporal['Periodo1'] = filtrado1
     for i in range(2, len(dict_files),1):
         periodo_file = 'Periodo{}'.format(i-1)
@@ -76,6 +77,7 @@ def multitemporal(direccion_carpeta, carpeta_salida, year1, year2, year3, year4,
         traslape['CATEGORIA{}'.format(i)] = traslape.apply(n_periodos, axis = 1)
         traslape['AREA{}_HA'.format(i)] = traslape['geometry'].area/10000.0
         filtrado = traslape[traslape['geometry'].geom_type == 'Polygon']
+        filtrado = filtrado[filtrado['AREA{}_HA'.format(i)]>0.001]
         multitemporal['Periodo{}'.format(i)] = filtrado
     salida = os.path.join(carpeta_salida, "Multitemporal")
     def archivo_en_uso(file_path):
@@ -94,7 +96,7 @@ def multitemporal(direccion_carpeta, carpeta_salida, year1, year2, year3, year4,
         if archivo_en_uso(output_file_path):
             print(f"El archivo {output_file_path} está en uso. Ciérrelo para continuar.")
         else:
-            multitemporal[key].to_file(output_file_path)
+            multitemporal[key].to_file(output_file_path, driver='ESRI Shapefile')
             print(f"Archivo guardado exitosamente: {output_file_path}")
     return multitemporal
     
