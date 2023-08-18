@@ -105,6 +105,7 @@ def multitemporal(direccion_carpeta, carpeta_salida, year1, year2, year3, year4,
             multitemporal['Periodo{}'.format(i)] = filtrado
             resumen = filtrado.groupby("CATEGORIA{}".format(i))['AREA{}_HA'.format(i)].sum()
             resumen_indices = []
+            indices.append('Periodo{}'.format(i))
             for i in resumen.index:
                 resumen_indices.append(i)
             for j, item in table.items():
@@ -112,7 +113,6 @@ def multitemporal(direccion_carpeta, carpeta_salida, year1, year2, year3, year4,
                     tabla[j].append(resumen[j])
                 else:
                     tabla[j].append(0)
-            indices.append('Periodo{}'.format(i))
         salida = os.path.join(carpeta_salida, "Multitemporal")
         def archivo_en_uso(file_path):
             for process in psutil.process_iter():
