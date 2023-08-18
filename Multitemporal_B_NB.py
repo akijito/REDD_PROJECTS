@@ -108,11 +108,11 @@ def multitemporal(direccion_carpeta, carpeta_salida, year1, year2, year3, year4,
             indices.append('Periodo{}'.format(i))
             for i in resumen.index:
                 resumen_indices.append(i)
-            for j, item in table.items():
+            for j, item in tabla_excel.items():
                 if j in resumen_indices:
-                    tabla[j].append(resumen[j])
+                    tabla_excel[j].append(resumen[j])
                 else:
-                    tabla[j].append(0)
+                    tabla_excel[j].append(0)
         salida = os.path.join(carpeta_salida, "Multitemporal")
         def archivo_en_uso(file_path):
             for process in psutil.process_iter():
