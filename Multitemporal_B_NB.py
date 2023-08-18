@@ -24,6 +24,9 @@ def multitemporal(direccion_carpeta, carpeta_salida, year1, year2, year3, year4,
     if counter == 0:
         print("Las coberturas se definieron correctamente.")
         multitemporal = dict()
+        tabla_excel = {'BOSQUE ESTABLE':[], 'DEFORESTACION':[], 'REGENERACION':[], 'NO BOSQUE ESTABLE':[], 
+                 'BOSQUE ESTABLE 2':[], 'DEFORESTACION 2':[], 'REGENERACION 2':[], 'NO BOSQUE ESTABLE 2':[], 'SIN INFORMACION':[]}
+        indices = []
         traslape = gpd.overlay(dict_files['year1'], dict_files['year2'], how='intersection', keep_geom_type = False)
         traslape = traslape.explode()
         def primer_periodo(traslape):
@@ -42,6 +45,16 @@ def multitemporal(direccion_carpeta, carpeta_salida, year1, year2, year3, year4,
         filtrado1 = traslape[traslape['geometry'].geom_type == 'Polygon']
         filtrado1 = filtrado1[filtrado1['AREA1_HA']>0.0001]
         multitemporal['Periodo1'] = filtrado1
+        resumen1 = filtrado1.groupby("CATEGORIA1")['AREA1_HA'].sum()
+        resumen1_indices = []
+        for i in resumen1.index:
+            resumen1_indices.append(i)
+        for j, item in tabla_excel.items():
+            if j in resumen1_indices:
+                tabla_excel[j].append(resumen1[j])
+            else:
+                tabla_excel[j].append(0)
+        indices.append('Periodo1')
         for i in range(2, len(dict_files),1):
             periodo_file = 'Periodo{}'.format(i-1)
             filtered_rows = multitemporal[periodo_file]['geometry'].apply(lambda geom: geom.geom_type == 'Polygon')
@@ -49,6 +62,7 @@ def multitemporal(direccion_carpeta, carpeta_salida, year1, year2, year3, year4,
             traslape = gpd.overlay(result, dict_files['year{}'.format(i+1)],
                                    how='intersection', keep_geom_type = False)
             traslape = traslape.explode()
+            
             def n_periodos(traslape):
                 if traslape['CATEGORIA{}'.format(i-1)] == "BOSQUE ESTABLE" and traslape['year{}'.format(i+1)] == "BOSQUE":
                     return "BOSQUE ESTABLE"
@@ -89,6 +103,16 @@ def multitemporal(direccion_carpeta, carpeta_salida, year1, year2, year3, year4,
             filtrado = traslape[traslape['geometry'].geom_type == 'Polygon']
             filtrado = filtrado[filtrado['AREA{}_HA'.format(i)]>0.001]
             multitemporal['Periodo{}'.format(i)] = filtrado
+            resumen = filtrado.groupby("CATEGORIA{}".format(i))['AREA{}_HA'.format(i)].sum()
+            resumen_indices = []
+            for i in resumen.index:
+                resumen_indices.append(i)
+            for j, item in table.items():
+                if j in resumen_indices:
+                    tabla[j].append(resumen[j])
+                else:
+                    tabla[j].append(0)
+            indices.append('Periodo{}'.format(i))
         salida = os.path.join(carpeta_salida, "Multitemporal")
         def archivo_en_uso(file_path):
             for process in psutil.process_iter():
@@ -108,6 +132,8 @@ def multitemporal(direccion_carpeta, carpeta_salida, year1, year2, year3, year4,
             else:
                 multitemporal[key].to_file(output_file_path, driver='ESRI Shapefile')
                 print(f"Archivo guardado exitosamente: {output_file_path}")
+        tabla_resumen = pd.DataFrame(tabla_excel, index=indices)
+        tabla_resumen.to_excel(f'{carpeta_salida}/Resumen.xlsx', index=True)
     else:
         print('Revisar las coberturas y corregir las inconsistencias en cuanto a escritura. Se encontraron {} errores'.format(counter))
         multitemporal = None
