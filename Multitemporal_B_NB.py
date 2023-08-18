@@ -20,7 +20,7 @@ def multitemporal(direccion_carpeta, carpeta_salida, year1, year2, year3, year4,
             cobertura_fila = fila[year]
             if cobertura_fila not in coberturas_esperadas:
                 counter += 1
-                print(f"Inconsistencia en la fila {indice}: valor {cobertura_fila} no esperado. Se debe corregir las inconsistencias encontradas en el archivo {year}"))
+                print(f"Inconsistencia en la fila {indice}: valor {cobertura_fila} no esperado. Se debe corregir las inconsistencias encontradas en el archivo {year}")
     if counter == 0:
         print("Las coberturas se definieron correctamente.")
         multitemporal = dict()
