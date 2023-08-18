@@ -13,18 +13,16 @@ def multitemporal(direccion_carpeta, carpeta_salida, year1, year2, year3, year4,
             columns = [year, 'geometry']
             filtered = file[columns]
             dict_files[year] = filtered
-    coberturas = False
+    counter = 0
     for year, file in dict_files.items():
         coberturas_esperadas = ['BOSQUE', 'NO BOSQUE']
         for indice, fila in dict_files[year].iterrows():
             cobertura_fila = fila[year]
             if cobertura_fila not in coberturas_esperadas:
-                coberturas = False
-                print(f"Inconsistencia en la fila {indice}: valor {cobertura_fila} no esperado."))
-            else:
-                coberturas = True
-                print("Las filas contienen correctamente coberturas BOSQUE y NO BOSQUE. Se procedera con el análisis multitemporal")
-    if coberturas:
+                counter += 1
+                print(f"Inconsistencia en la fila {indice}: valor {cobertura_fila} no esperado. Se debe corregir las inconsistencias encontradas en el archivo {year}"))
+    if counter == 0:
+        print("Las coberturas se definieron correctamente.")
         multitemporal = dict()
         traslape = gpd.overlay(dict_files['year1'], dict_files['year2'], how='intersection', keep_geom_type = False)
         traslape = traslape.explode()
@@ -111,7 +109,7 @@ def multitemporal(direccion_carpeta, carpeta_salida, year1, year2, year3, year4,
                 multitemporal[key].to_file(output_file_path, driver='ESRI Shapefile')
                 print(f"Archivo guardado exitosamente: {output_file_path}")
     else:
-        print('Revisar las coberturas y corregir las inconsistencias en cuanto a escritura. Se debe plasmar correctamente las coberturas como BOSQUE o NO BOSQUE')
+        print('Revisar las coberturas y corregir las inconsistencias en cuanto a escritura. Se encontraron {} errores'.format(counter))
         multitemporal = None
     return multitemporal
     
