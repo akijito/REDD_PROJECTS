@@ -38,7 +38,7 @@ def multitemporal(direccion_carpeta, carpeta_salida, year1, year2, year3, year4,
         indices = []
         #"overlay" es una función de geopandas que cumple las mismas funciones que "intersect" en ArcGIS
         traslape = gpd.overlay(dict_files['year1'], dict_files['year2'], how='intersection', keep_geom_type = False)
-        traslape = traslape.explode()
+        traslape = traslape.explode(index_parts = True)
         #La función "primer_periodo" se debe definir incialmente ya que el análisis de los dos primeros años es particular porque se evaluan unicamente
         #coberturas BOSQUE y NO BOSQUE. La función contiene la lógica de las diferentes posibles iteraciones
         def primer_periodo(traslape):
@@ -77,7 +77,7 @@ def multitemporal(direccion_carpeta, carpeta_salida, year1, year2, year3, year4,
             result = multitemporal[periodo_file][filtered_rows]
             traslape = gpd.overlay(result, dict_files['year{}'.format(i+1)],
                                    how='intersection', keep_geom_type = False)
-            traslape = traslape.explode()
+            traslape = traslape.explode(index_parts = True)
             #Esta función es para evaluar más de un periodo o más de dos años
             def n_periodos(traslape):
                 if traslape['CATEGORIA{}'.format(i-1)] == "BOSQUE ESTABLE" and traslape['year{}'.format(i+1)] == "BOSQUE":
